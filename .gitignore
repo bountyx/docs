@@ -1,0 +1,22 @@
+# build output
+.next
+out
+dist
+public/sitemap.xml
+
+# dependencies
+node_modules
+deploy-server/node_modules
+package-lock.json
+
+# logs
+*.log
+
+# other
+.DS_Store
+.idea
+.vscode
+
+.now
+.vercel
+.env

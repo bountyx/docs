@@ -1,0 +1,36 @@
+import Standard from '~/components/layout/standard'
+import Note from '~/components/text/note'
+import { InlineCode } from '~/components/text/code'
+import EmailLink from '~/components/text/email-link'
+
+export const meta = {
+  title: 'Serverless Function not found.',
+  description: 'The requested Serverless Function was not found.',
+  editUrl: 'pages/docs/error/platform/INTERNAL_FUNCTION_NOT_FOUND.mdx',
+  lastEdited: '2020-04-15T01:59:48.000Z'
+}
+
+#### Platform Error
+
+The requested Serverless Function was not found by the platform infrastructure layer.
+
+<br />
+
+<Note label={false}>
+  <b>500</b>: Internal Error
+  <br />
+  Code: <InlineCode>FUNCTION_NOT_FOUND</InlineCode>
+</Note>
+
+---
+
+#### Troubleshoot
+
+- Make sure the link you accessed is correct.
+- If you believe the link is correct and you were not expecting this error; **<EmailLink type="support">Contact Support</EmailLink>** along with the ID on the error page from your deployment.
+
+export default ({ children }) => <Standard meta={meta}>{children}</Standard>
+
+export const config = {
+  amp: 'hybrid'
+}

@@ -1,0 +1,261 @@
+import Doc from '~/components/layout/docs'
+import Card from '~/components/card'
+import { Image } from '~/components/media'
+import Caption from '~/components/text/caption'
+import Note from '~/components/text/note'
+import Collapse, { CollapseGroup } from '~/components/collapse'
+import { IconCard } from '~/components/card'
+import { List } from '~/components/list'
+import BitbucketIcon from '~/components/icons/bitbucket'
+import GitLabIcon from '~/components/icons/gitlab'
+import GitHubIcon from '~/components/icons/github'
+import ProductName from '~/components/name/product-name'
+import Link from '~/geist/link'
+import { PRODUCT_NAME } from '~/lib/constants'
+
+export const meta = {
+  title: 'Git Integrations',
+  description: `How to use the ${PRODUCT_NAME} Git Integrations for GitHub, GitLab, or Bitbucket to automatic deploy from your project's repository for each push and ship to production on merge to the main branch.`,
+  image: `${process.env.ASSETS}/docs/git-integrations/git-push.png`,
+  editUrl: 'pages/docs/git-integrations/index.mdx',
+  lastEdited: '2020-08-28T14:49:51.000Z',
+}
+
+​​<ProductName /> provides integrations for your [GitHub](/docs/v2/git-integrations/vercel-for-github), [GitLab](/docs/v2/git-integrations/vercel-for-gitlab), and [Bitbucket](/docs/v2/git-integrations/vercel-for-bitbucket) projects, allowing for **automatic deployments on every branch push** and merge to the [Production Branch](#production-branch).
+
+<Image
+  src={`${process.env.ASSETS}/docs/git-integrations/git-push.png`}
+  width={2080 / 3}
+  height={1440 / 3}
+/>
+
+The <ProductName /> Git Integrations provide the following benefits:
+
+- [Preview Deployments](/docs/v2/platform/deployments#preview) for every push.
+- [Production Deployments](/docs/v2/platform/deployments#production) for the most recent changes from the [Production Branch](#production-branch).
+- Instant rollbacks when reverting changes assigned to a custom domain.
+
+The easiest way to use a Git Integration is to think of your **`main` branch as production**. Every time a pull/merge request is made to that branch, <ProductName /> will **create a unique deployment**, allowing you to **view the changes in a preview environment before merging**.
+
+In this case, `main` is the Production Branch. When merging to the Production Branch, a **Production Deployment** is made, making the latest changes available to assigned custom domains automatically.
+
+You can choose to use a different branch as the [Production Branch](#production-branch).
+
+## Available Integrations
+
+Click any Git Integration from the list below to skip to its section:
+
+<List columnsDesktop={3} columnsTablet={3} columnsMobile={1}>
+  <IconCard
+    label="GitHub"
+    icon={<GitHubIcon />}
+    href="/docs/v2/git-integrations/vercel-for-github"
+    arrowed
+  />
+  <IconCard
+    label="GitLab"
+    icon={<GitLabIcon />}
+    href="/docs/v2/git-integrations/vercel-for-gitlab"
+    arrowed
+  />
+  <IconCard
+    label="Bitbucket"
+    icon={<BitbucketIcon />}
+    href="/docs/v2/git-integrations/vercel-for-bitbucket"
+    arrowed
+  />
+</List>
+
+## Quick Installation
+
+You can install any Git Integration directly from your dashboard by clicking ["Import Project"](/import) followed by ["Import Git Repository"](/import/git). Then enter the URL of your GitHub, GitLab, or Bitbucket repository to connect and import it.
+
+<Image
+  src={`${process.env.ASSETS}/docs/common/github-from-existing-code.png`}
+  width={1280 / 2}
+  height={588 / 2}
+  shadow
+  borderRadius
+/>
+<Caption>
+  Installing the Git Integration for a Git provider of your choice.
+</Caption>
+
+## Deploying Private Git Repositories
+
+In order to deploy commits from a private Git Repository (or a fork of a private Git Repository) under a Team, the commit author has to be a member of the Team on <ProductName /> (even if the commit author is a bot).
+
+If the commit author is not a member, the Deployment will be prevented and a request to join the Team will automatically be issued for the commit author. After that, the owners of the Team will be notified and can either accept or decline the membership request on the "Members" page in the Team Settings.
+
+Declining the request will leave the commit undeployed. If the commit author gets accepted as a member of the Team, however, their most recent commit will resume to be deployed to <ProductName /> automatically.
+
+Commit authors will automatically be considered a part of the Team on <ProductName /> if one of the existing members connected their Personal Account on <ProductName /> with the Git account that created the commit.
+
+## Production Branch
+
+A [Production Deployment](/docs/v2/platform/deployments#production) will be created each time you merge to the **Production Branch**.
+
+### Default Configuration
+
+When you create a new Project from a Git repository on <ProductName />, the Production Branch will be selected in the following order:
+
+- The `main` branch.
+- If not present, the `master` branch ([more details](https://vercel.com/blog/custom-production-branch#a-note-on-the-master-branch)).
+- [Only for Bitbucket] If not present, the "Production Branch" setting of your Git repository is used.
+- If not present, the Git repository's default branch.
+
+### Customizing the Production Branch
+
+On the **Git Integration** page in the **Project Settings**, you can change your Production Branch to be one of the following:
+
+- The `main` branch.
+- The Git repository's default branch (for Bitbucket, the Git repository's "Production Branch" setting is considered).
+- Any other custom branch of your choice.
+
+Whenever a new commit is then pushed to the branch you configured here, a [Production Deployment](/docs/v2/platform/deployments#production) will be created for you.
+
+<Image
+  src={`${process.env.ASSETS}/docs/common/production-branch-configuration.png`}
+  width={1488 / 2}
+  height={536 / 2}
+  shadow
+  borderRadius
+/>
+<Caption>Configuring the Production Branch of your Project.</Caption>
+
+## Monorepos
+
+If you'd like to deploy multiple different directories within the same Git repository,
+you can do so by creating a separate [Project](/docs/platform/projects) for each directory and configuring the [Root Directory setting](/docs/build-step?query=root%20directory#root-directory) for it.
+
+The easiest way to achieve this is by [importing your Git repository](/docs/v2/git-integrations#quick-installation) multiple times and selecting a different
+Root Directory every time – until one Project was created for each of the relevant directories.
+
+<Image
+  src={`${process.env.ASSETS}/docs/common/monorepo-import.png`}
+  width={1284 / 2}
+  height={966 / 2}
+  shadow
+  borderRadius
+/>
+<Caption>Selecting a Root Directory for one of your new Projects.</Caption>
+
+Once you've created a separate Project for each of the directories within your Git repository,
+every commit will issue a Deployment for all connected Projects and display the resulting URLs on your pull requests and commits:
+
+<Image
+  src={`${process.env.ASSETS}/docs/common/monorepo-pr.png`}
+  width={1809 / 2}
+  height={920 / 2}
+/>
+<Caption>An example of Deployment URLs provided by a Git Integration.</Caption>
+
+The amount of Vercel Projects that can be connected with the same Git repository is [limited depending on your plan](/docs/platform/limits#general-limits). To increase this limit, please [contact our Sales Team](/contact/sales).
+
+### Using Monorepos with Vercel CLI
+
+Because it's only possible to link a single Vercel Project when running the `vercel` command, we recommend cloning your Git repository multiple times and then running `vercel` for each one to deploy them.
+
+The same applies to the `vercel dev` command (local Development).
+
+In the future, this workflow piece will be improved drastically. In the meantime, we strongly suggest using one of our [Git Integrations](/docs/git-integrations) instead of Vercel CLI.
+
+### Ignoring the Build Step
+
+Pushing a commit to your monorepo will create a Deployment for each of the connected Vercel projects.
+
+If you want to abort the Build Step for certain projects if their files didn't change, you can do so with the [Ignored Build Step](/docs/platform/projects#ignored-build-step) project setting.
+
+### Monorepo FAQ
+
+<br />
+
+<CollapseGroup>
+  <Collapse size="small" title="How can I speed up builds?">
+    <div style={{ height: 10 }} />
+    <p>
+      Whether or not your deployments are queued depends on the amount of
+      Concurrent Builds you have available. Personal accounts are limited to 1
+      Concurrent Build, while teams can customize the amount on the "Billing"
+      page in the team settings.
+    </p>
+    <p>
+      Learn more about how to adjust your Concurrent Builds{' '}
+      <Link
+        color
+        href="https://vercel.com/knowledge/why-are-my-vercel-builds-queued"
+      >
+        here
+      </Link>
+      .
+    </p>
+  </Collapse>
+  <Collapse
+    size="small"
+    title="How can I make my projects available on different paths under the same domain?"
+  >
+    <div style={{ height: 10 }} />
+    <p>
+      After having set up your monorepo as described above, each of the
+      directories will be a separate Vercel project, and therefore be available
+      on a separate domain.
+    </p>
+    <p>
+      If you'd like to host multiple projects under a single domain, you can
+      create a new project, assign the domain in the project settings, and proxy
+      requests to the other upstream projects. The proxy can be implemented
+      using a `vercel.json` file with the{' '}
+      <Link color href="https://vercel.com/docs/configuration#project/rewrites">
+        rewrites
+      </Link>{' '}
+      property, where each `source` is the path under the main domain and each
+      `destination` is the upstream project domain.
+    </p>
+  </Collapse>
+  <Collapse size="small" title="How are projects built after I push?">
+    <div style={{ height: 10 }} />
+    <p>
+      Pushing a commit to a Git repository that is connected with multiple
+      Vercel projects will result in multiple deployments being created and
+      built in parallel for each.
+    </p>
+  </Collapse>
+  <Collapse
+    size="small"
+    title="Can I share source files between projects? Are Yarn & Lerna Workspaces supported?"
+  >
+    <div style={{ height: 10 }} />
+    <p>
+      To access source files outside the Root Directory (which enables Yarn &
+      Lerna Workspaces), enable the "
+      <i>
+        Include source files outside of the Root Directory in the Build Step
+      </i>
+      " option in the Root Directory section within the project settings.
+    </p>
+    <p>
+      Vercel projects created after August 27th 2020 23:50 UTC have this option
+      enabled by default.
+    </p>
+    <p>If you're using Vercel CLI, at least version 20.1.0 is required.</p>
+  </Collapse>
+  <Collapse size="small" title="How can I use monorepos with Vercel CLI?">
+    <div style={{ height: 10 }} />
+    <p>
+      Because Vercel CLI only allows for linking a single Vercel project, you
+      currently need to clone your Git repository multiple times (once per
+      directory you want to deploy or develop) and then link a project for each.
+    </p>
+    <p>
+      Use at least version 20.1.0 of Vercel CLI to ensure you can take advantage
+      of the option for accessing source files outside the Root Directory
+      (mentioned in a section above).
+    </p>
+  </Collapse>
+</CollapseGroup>
+
+export default ({ children }) => <Doc meta={meta}>{children}</Doc>
+
+export const config = {
+  amp: 'hybrid',
+}

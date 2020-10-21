@@ -1,0 +1,35 @@
+import Standard from '~/components/layout/standard'
+import Note from '~/components/text/note'
+import { InlineCode } from '~/components/text/code'
+import EmailLink from '~/components/text/email-link'
+
+export const meta = {
+  title: 'Invalid Serverless Function Accounts',
+  description: 'An error occurred in the platform infrastructure layer.',
+  editUrl: 'pages/docs/error/platform/INTERNAL_INVALID_FUNCTION_ACCOUNTS.mdx',
+  lastEdited: '2020-04-15T01:59:48.000Z'
+}
+
+#### Platform Error
+
+An error occurred in the platform infrastructure layer.
+
+<br />
+
+<Note label={false}>
+  <b>500</b>: Internal Error
+  <br />
+  Code: <InlineCode>INTERNAL_INVALID_FUNCTION_ACCOUNTS</InlineCode>
+</Note>
+
+---
+
+#### Troubleshoot
+
+- **<EmailLink type="support">Contact Support</EmailLink>** along with the ID on the error page from your deployment.
+
+export default ({ children }) => <Standard meta={meta}>{children}</Standard>
+
+export const config = {
+  amp: 'hybrid'
+}

@@ -1,0 +1,435 @@
+import Snippet from '~/components/snippet'
+import Caption from '~/components/text/caption'
+import { InlineCode, Code } from '~/components/text/code'
+import Example from '~/components/example'
+import Link from '~/components/text/link'
+import Note from '~/components/text/note'
+import Tag from '~/components/text/tag'
+import ProductName from '~/components/name/product-name'
+import OrgName from '~/components/name/org-name'
+
+export const meta = {
+  editUrl:
+    'pages/docs/runtimes/runtimes-mdx/official-runtimes/official-runtimes.mdx',
+  lastEdited: '2019-10-22T21:47:59.000Z',
+}
+
+# Official Runtimes
+
+Runtimes are modules that transform your source code into [Serverless Functions](/docs/v2/serverless-functions/introduction/), which are served by our [CDN at the edge](/docs/v2/edge-network/caching/).
+
+<Note type="warning">
+  In most cases, advanced Runtimes usage with configuration is not necessary.
+  See{' '}
+  <Link href="/docs/introduction">
+    the <ProductName /> Introduction documentation
+  </Link>{' '}
+  or the{' '}
+  <Link href="/docs/serverless-functions/introduction">
+    Serverless Functions documentation
+  </Link>{' '}
+  for more information.
+</Note>
+
+Listed below are all official Runtimes from <OrgName />.
+
+| Runtime                               | Description                                                                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Node.js](#official-runtimes/node-js) | The Node.js Runtime takes an entrypoint of a Node.js function, builds its dependencies (if any) and bundles them into a Serverless Function. |
+| [Go](#official-runtimes/go)           | The Go Runtime takes in a Go program that defines a singular HTTP handler and outputs it as a Serverless Function.                           |
+| [Python](#official-runtimes/python)   | The Python Runtime takes in a Python program that defines a singular HTTP handler and outputs it as a Serverless Function.                   |
+| [Ruby](#official-runtimes/ruby)       | The Ruby Runtime takes in a Ruby program that defines a singular HTTP handler and outputs it as a Serverless Function.                       |
+
+## Node.js
+
+<Tag>Status: Stable</Tag>
+
+The Node.js Runtime, by default, builds and serves Serverless Functions within the `/api` directory of a project, providing the files have a file extension of either `.js` or `.ts`.
+
+A Node.js Serverless Function must export a default function handler, for example:
+
+```js
+module.exports = (req, res) => {
+  const { name = 'World' } = req.query
+  res.send(`Hello ${name}!`)
+}
+```
+
+<Caption>
+  An example serverless Node.js function using{' '}
+  <Link href="#official-runtimes/node-js/node-js-request-and-response-objects">
+    the Request and Response objects
+  </Link>
+  .
+</Caption>
+
+<Note>
+  The Node.js Runtime also supports{' '}
+  <Link href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function">
+    {' '}
+    asynchronous functions
+  </Link>
+  .
+</Note>
+
+If you need more advanced behavior, such as a custom build step or private npm modules, see the [Advanced Node.js Usage section](#advanced-usage/advanced-node-js-usage).
+
+### Node.js Version
+
+New deployments automatically select the latest LTS Node.js version available on <ProductName /> at that point in time.
+
+In order to select a different version, add a `package.json` file with an `engines` field, like so:
+
+```json
+{
+  "engines": {
+    "node": "12.x"
+  }
+}
+```
+
+<Caption>
+  Defining the <InlineCode>engines</InlineCode> property in a{' '}
+  <InlineCode>package.json</InlineCode> file.
+</Caption>
+
+When defining an `engines` property, the following Node.js versions can be selected:
+
+- **10.x**
+- **12.x** (The default if the property is not defined)
+
+In order to find out which Node.js version your deployment is using, run `node -v` inside it or log the output of `process.version`.
+
+<Note type="warning">
+  Our upstream providers do not support passing a specific version like{' '}
+  <InlineCode>12.14.0</InlineCode>. Only major values like{' '}
+  <InlineCode>12.x</InlineCode> will work.
+</Note>
+
+### Node.js Dependencies
+
+**For dependencies** listed in a `package.json` file at the root of a project, the following behavior is used:
+
+- If a `package-lock.json` file is present in the project, `npm install` is used.
+- Otherwise, `yarn` is used, by default.
+
+### Using TypeScript with the Node.js Runtime
+
+The Node.js Runtime supports files ending with `.ts` inside of the `/api` directory as TypeScript files to compile and serve when deploying.
+
+An example TypeScript file that exports a default Node.js function and takes in [the standard Node.js Request and Response](#official-runtimes/node-js/node-js-request-and-response-objects) objects is as follows:
+
+```js
+import { NowRequest, NowResponse } from '@vercel/node'
+
+export default function (req: NowRequest, res: NowResponse) {
+  const { name = 'World' } = req.query
+  res.send(`Hello ${name}!`)
+}
+```
+
+<Caption>
+  An example serverless Node.js function written in TypeScript, using types from
+  the <InlineCode>@vercel/node</InlineCode> module for the helper methods.
+</Caption>
+
+The `NowRequest` and `NowResponse` imports in the above example are types that we provide for [the Request and Response objects](#official-runtimes/node-js/node-js-request-and-response-objects), including the helper methods with <ProductName />. These types can be installed from npm with the following command:
+
+<Snippet width="100%" dark text="npm install @vercel/node --save-dev" />
+<Caption>
+  Installing <InlineCode>@vercel/node</InlineCode> for types when using Node.js
+  on <ProductName />.
+</Caption>
+
+You can also use a `tsconfig.json` file at the root of your project to configure the TypeScript compiler. Most options are supported aside from ["Path Mappings"](https://www.typescriptlang.org/docs/handbook/module-resolution.html#path-mapping) and ["Project References"](https://www.typescriptlang.org/docs/handbook/project-references.html).
+
+### Node.js Request and Response Objects
+
+Each request to a Node.js Serverless Function gives access to Request and Response objects. These objects are the standard HTTP [Request](https://nodejs.org/api/http.html#http_event_request) and [Response](https://nodejs.org/api/http.html#http_class_http_serverresponse) objects from Node.js.
+
+#### Node.js Helpers
+
+&#8203;<ProductName /> additionally provides helper methods inside of the Request and Response objects passed to Node.js Serverless Functions. These methods are:
+
+| method                                                                                     | description                                                                                                                                                                                    | object   |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `req.query`                                                                                | An object containing the request's [query string](https://en.wikipedia.org/wiki/Query_string), or `{}` if the request does not have a query string.                                            | Request  |
+| `req.cookies`                                                                              | An object containing the cookies sent by the request, or `{}` if the request contains no cookies.                                                                                              | Request  |
+| [`req.body`](#official-runtimes/node-js/node-js-request-and-response-objects/request-body) | An object containing the body sent by the request, or `null` if no body is sent.                                                                                                               | Request  |
+| `res.status(code)`                                                                         | A function to set the status code sent with the response where `code` must be a valid [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). Returns `res` for chaining. | Response |
+| `res.send(body)`                                                                           | A function to set the content of the response where `body` can be a `string`, an `object` or a `Buffer`.                                                                                       | Response |
+| `res.json(obj)`                                                                            | A function to send a JSON response where `obj` is the JSON object to send.                                                                                                                     | Response |
+| `res.redirect(url)`                                                                        | A function to redirect to the URL derived from the specified path with status code "307 Temporary Redirect".                                                                                   | Response |
+| `res.redirect(statusCode, url)`                                                            | A function to redirect to the URL derived from the specified path, with specified [HTTP status code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes).                                 | Response |
+
+The following Node.js Serverless Function example showcases the use of `req.query`, `req.cookies` and `req.body` helpers:
+
+```js
+module.exports = (req, res) => {
+  let who = 'anonymous'
+
+  if (req.body && req.body.who) {
+    who = req.body.who
+  } else if (req.query.who) {
+    who = req.query.who
+  } else if (req.cookies.who) {
+    who = req.cookies.who
+  }
+
+  res.status(200).send(`Hello ${who}!`)
+}
+```
+
+<Caption>
+  Example Node.js Serverless Function using the{' '}
+  <InlineCode>req.query</InlineCode>, <InlineCode>req.cookies</InlineCode>, and{' '}
+  <InlineCode>req.body</InlineCode> helpers. It returns greetings for the user
+  specified using <InlineCode>req.send()</InlineCode>.
+</Caption>
+
+<Note>
+  If needed, you can opt-out of <ProductName /> providing{' '}
+  <InlineCode>helpers</InlineCode> using{' '}
+  <Link href="#advanced-usage/advanced-node-js-usage/disabling-helpers-for-node-js">
+    advanced configuration
+  </Link>
+  .
+</Note>
+
+#### Request Body
+
+We populate the `req.body` property with a parsed version of the content sent with the request when possible.
+
+We follow a set of rules on the `Content-type` header sent by the request to do so:
+
+| `Content-Type` header               | Value of `req.body`                                                                     |
+| ----------------------------------- | --------------------------------------------------------------------------------------- |
+| No header                           | `undefined`                                                                             |
+| `application/json`                  | An object representing the parsed JSON sent by the request.                             |
+| `application/x-www-form-urlencoded` | An object representing the parsed data sent by with the request.                        |
+| `text/plain`                        | A string containing the text sent by the request.                                       |
+| `application/octet-stream`          | A [Buffer](https://nodejs.org/api/buffer.html) containing the data sent by the request. |
+
+With the `req.body` helper, you can build applications without extra dependencies or having to [parse the content of the request manually](https://nodejs.org/ja/docs/guides/anatomy-of-an-http-transaction/#request-body).
+
+<Note>
+  The <InlineCode>req.body</InlineCode> helper is set using a{' '}
+  <Link
+    tab
+    href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get"
+  >
+    JavaScript getter
+  </Link>
+  . In turn, it is only computed when it is accessed.
+</Note>
+
+When the request body contains malformed JSON, accessing `req.body` will throw an error. You can catch that error by wrapping `req.body` with [`try...catch`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch):
+
+```js
+try {
+  req.body
+} catch (error) {
+  return res.status(400).json({ error: 'My custom 400 error' })
+}
+```
+
+<Caption>
+  Catching the error thrown by <InlineCode>req.body</InlineCode> with{' '}
+  <Link
+    tab
+    href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch"
+  >
+    <InlineCode>try...catch</InlineCode>
+  </Link>
+  .
+</Caption>
+
+---
+
+## Go
+
+<Tag>Status: Alpha</Tag>
+
+The Go Runtime is used by <ProductName /> to compile Go Serverless Functions that expose a single HTTP handler, from a `.go` file within an `/api` directory at your project's root.
+
+For example, define an `index.go` file inside an `/api` directory as follows:
+
+```go
+package handler
+
+import (
+  "fmt"
+  "net/http"
+)
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+  fmt.Fprintf(w, "<h1>Hello from Go!</h1>")
+}
+```
+
+<Caption>
+  An example <InlineCode>index.go</InlineCode> file inside an{' '}
+  <InlineCode>/api</InlineCode> directory.
+</Caption>
+
+For advanced usage, such as using private packages with your Go projects, see the [Advanced Go Usage section](#advanced-usage/advanced-go-usage).
+
+<Note>
+  The exported function needs to include the{' '}
+  <Link href="https://golang.org/pkg/net/http/#HandlerFunc">
+    <InlineCode>HandlerFunc</InlineCode>
+  </Link>{' '}
+  signature type, but can use any valid Go exported function declaration as the
+  function name.
+</Note>
+
+### Go Version
+
+Go version 1.x is used for Go projects deployed with <ProductName />.
+
+### Go Dependencies
+
+The Go Runtime will automatically detect a `go.mod` file to install dependencies at the root of a project.
+
+### Go Build Configuration
+
+You can provide custom build flags by using the `GO_BUILD_FLAGS` [build environment variable](/docs/v2/build-step#environment-variables).
+
+```json
+{
+  "build": {
+    "env": {
+      "GO_BUILD_FLAGS": "-ldflags '-s -w'"
+    }
+  }
+}
+```
+
+<Caption>
+  An example <InlineCode>-ldflags</InlineCode> flag with{' '}
+  <InlineCode>-s -w</InlineCode>. This will remove debug information from the
+  output file. This is the default value when no{' '}
+  <InlineCode>GO_BUILD_FLAGS</InlineCode> are provided.
+</Caption>
+
+---
+
+## Python
+
+<Tag>Status: Beta</Tag>
+
+The Python Runtime is used by <ProductName /> to compile Python Serverless Functions, that defines a singular HTTP `handler` variable, inheritting from the `BaseHTTPRequestHandler` class, from a `.py` file within an `/api` directory at your project's root.
+
+For example, define an `index.py` file inside a `/api` directory as follows:
+
+```python
+from http.server import BaseHTTPRequestHandler
+from cowpy import cow
+
+class handler(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type','text/plain')
+        self.end_headers()
+        message = cow.Cowacter().milk('Hello from Python from a Serverless Function!')
+        self.wfile.write(message.encode())
+        return
+```
+
+<Caption>
+  An example <InlineCode>index.py</InlineCode> file inside an{' '}
+  <InlineCode>/api</InlineCode> directory.
+</Caption>
+
+Inside `requirements.txt` define:
+
+```
+cowpy==1.0.3
+```
+
+<Caption>
+  An example <InlineCode>requirements.txt</InlineCode> file that defines{' '}
+  <InlineCode>cowpy</InlineCode> as a dependency.
+</Caption>
+
+For advanced usage, such as using WSGI or ASGI for your Python projects, see the [Advanced Python Usage section](#advanced-usage/advanced-python-usage).
+
+### Python Version
+
+Python projects deployed with <ProductName /> use Python version 3.6.
+
+### Python Dependencies
+
+You can install dependencies for your Python projects by defining them in a `requirements.txt` or a `Pipfile.lock` file.
+
+---
+
+## Ruby
+
+<Tag>Status: Alpha</Tag>
+
+The Ruby Runtime is used by <ProductName /> to compile Ruby Serverless Functions that define a singular HTTP handler from `.rb` files within an `/api` directory at your project's root.
+
+Ruby files must have one of the following variables defined:
+
+- `Handler` proc that matches the `do |req, res|` signature.
+- `Handler` class that inherits from the `WEBrick::HTTPServlet::AbstractServlet` class.
+
+For example, define a `index.rb` file inside a `/api` directory as follows:
+
+```ruby
+require 'cowsay'
+
+Handler = Proc.new do |req, res|
+  name = req.query['name'] || 'World'
+
+  res.status = 200
+  res['Content-Type'] = 'text/text; charset=utf-8'
+  res.body = Cowsay.say("Hello #{name}", 'cow')
+end
+```
+
+<Caption>
+  An example <InlineCode>index.rb</InlineCode> file inside an{' '}
+  <InlineCode>/api</InlineCode> directory.
+</Caption>
+
+Inside a `Gemfile` define:
+
+```ruby
+source "https://rubygems.org"
+
+gem "cowsay", "~> 0.3.0"
+```
+
+<Caption>
+  An example <InlineCode>Gemfile</InlineCode> file that defines{' '}
+  <InlineCode>cowsay</InlineCode> as a dependency.
+</Caption>
+
+### Ruby Version
+
+New deployments use Ruby 2.7.x as the default version.
+
+You can specify the version of Ruby by defining `ruby` in a `Gemfile`, like so:
+
+```
+source "https://rubygems.org"
+ruby "~> 2.7.x"
+```
+
+When defining a Ruby version, the following Ruby versions can be selected:
+
+- 2.7.x (default)
+- 2.5.x
+
+<Note>
+  If the patch part of the version is defined, like{' '}
+  <InlineCode>2.5.5</InlineCode> it will be ignored and assume the latest{' '}
+  <InlineCode>2.5.x</InlineCode>.
+</Note>
+
+### Ruby Dependencies
+
+This Runtime supports installing dependencies defined in the `Gemfile`. Alternatively, dependencies can be vendored with the `bundler install --deployment` command (useful for gems that require native extensions). In this case, dependencies are not built on deployment.

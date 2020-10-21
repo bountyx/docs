@@ -1,0 +1,36 @@
+import Standard from '~/components/layout/standard'
+import Note from '~/components/text/note'
+import { InlineCode } from '~/components/text/code'
+import EmailLink from '~/components/text/email-link'
+
+export const meta = {
+  title: 'Failed To Get Deployment',
+  description:
+    'The platform infrastructure failed to fetch the requested deployment.',
+  editUrl: 'pages/docs/error/platform/INTERNAL_DEPLOYMENT_FETCH_FAILED.mdx',
+  lastEdited: '2020-04-15T01:59:48.000Z'
+}
+
+#### Platform Error
+
+An error occurred in the platform infrastructure layer.
+
+<br />
+
+<Note label={false}>
+  <b>500</b>: Internal Error
+  <br />
+  Code: <InlineCode>INTERNAL_DEPLOYMENT_FETCH_FAILED</InlineCode>
+</Note>
+
+---
+
+#### Troubleshoot
+
+- **<EmailLink type="support">Contact Support</EmailLink>** along with the ID on the error page from your deployment.
+
+export default ({ children }) => <Standard meta={meta}>{children}</Standard>
+
+export const config = {
+  amp: 'hybrid'
+}
